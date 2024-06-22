@@ -1,0 +1,6 @@
+﻿services:
+  bluffgame:
+    image: bluffgame
+    build:
+      context: .
+      dockerfile: BluffGame/Dockerfile
