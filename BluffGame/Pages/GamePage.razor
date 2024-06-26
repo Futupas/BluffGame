@@ -1,5 +1,6 @@
 @page "/Game/{GameId}/{CreatorGuid?}"
 @* @using System.Text.Json *@
+@using BluffGame.Exceptions
 @using BluffGame.Models
 
 <h3>Game</h3>
@@ -253,7 +254,7 @@ else
 
     private bool WeNeedNewRound()
     {
-        if (!game.Rounds.Any()) throw new Exception("Unreachable exception: no rounds");
+        if (!game.Rounds.Any()) throw new NoRoundsException();
 
         if (game.Rounds.Count == 1)
         {

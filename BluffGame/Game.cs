@@ -1,3 +1,4 @@
+using BluffGame.Exceptions;
 using BluffGame.Pages;
 
 namespace BluffGame.Models;
@@ -58,7 +59,7 @@ public class Game
 
     public bool HaveIWished(string user)
     {
-        if (!Rounds.Any()) throw new Exception("Unreachable exception: no rounds");
+        if (!Rounds.Any()) throw new NoRoundsException();
         
         return Rounds
             .Last()
@@ -154,21 +155,21 @@ public class Game
     }
     public string WhoAmIGuessingFor(string username)
     {
-        if (!Rounds.Any()) throw new Exception("No rounds.");
+        if (!Rounds.Any()) throw new NoRoundsException();
 
         return Rounds.Last().Couples.First(x => x.UserAsks == username).UserAnswers;
     }
 
     public void WishValue(string username, bool value, bool? hint)
     {
-        if (!Rounds.Any()) throw new Exception("No rounds.");
+        if (!Rounds.Any()) throw new NoRoundsException();
         var couple = Rounds.Last().Couples.First(x => x.UserAsks == username);
         couple.Wished = value;
         couple.Hint = hint;
     }
     public void AnswerValue(string username, bool value)
     {
-        if (Rounds.Count < 2) throw new Exception("Cannot answer.");
+        if (Rounds.Count < 2) throw new NoRoundsException();
         Rounds[^2].Couples.First(x => x.UserAnswers == username).Answered = value;
     }
 
