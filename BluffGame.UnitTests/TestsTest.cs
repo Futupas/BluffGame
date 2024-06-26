@@ -9,9 +9,9 @@ public class TestsTest
         Assert.True(true);
     }
     
-    // [Fact]
-    // public void BadTest()
-    // {
-    //     Assert.True(false);
-    // }
+    [Fact]
+    public void BadTest()
+    {
+        Assert.True(false);
+    }
 }
