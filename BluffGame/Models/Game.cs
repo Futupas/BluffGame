@@ -79,16 +79,25 @@ public class Game
 
     public bool TryFindDidIWinInPreviousRound(string user, out bool win)
     {
-        if (Rounds.Count < 2)
-        {
-            win = false;
-            return false;
-        }
-
-        win = Rounds[^2]
+        // if (Rounds.Count < 3)
+        // {
+        //     win = false;
+        //     return false;
+        // }
+        //
+        // win = Rounds[^3]
+        //     .Couples
+        //     .First(x => x.UserAnswers == user).Guessed;
+        // return true;
+        
+        var result = Rounds
+            .LastOrDefault(x => x.Couples.Exists(y => y.UserAnswers == user && y.Answered is not null))?
             .Couples
-            .First(x => x.UserAnswers == user).Guessed;
-        return true;
+            .First(x => x.UserAnswers == user)
+            .Guessed;
+
+        win = result ?? false;
+        return result is not null;
     }
 
     public bool IsRoundFinished()

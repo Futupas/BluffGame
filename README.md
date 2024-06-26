@@ -10,3 +10,4 @@ A simple bluff game for a company (trust/no)
 * Some tests
 * QR code
 * Docker
+* Information about round
