@@ -18,6 +18,6 @@ public class Couple
     public bool? Lied => Hint is null ? null : Hint == Wished;
 
     /// <summary> Calculated value </summary>
-    public bool Guessed => Wished is not null && Wished == Answered;
+    public bool Guessed => Wished is not null && Answered is not null && Wished == Answered;
     
 }

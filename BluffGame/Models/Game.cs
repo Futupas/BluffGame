@@ -87,7 +87,7 @@ public class Game
 
         win = Rounds[^2]
             .Couples
-            .FirstOrDefault(x => x.UserAnswers == user)?.Guessed == true;
+            .First(x => x.UserAnswers == user).Guessed;
         return true;
     }
 
