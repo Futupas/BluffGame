@@ -7,7 +7,7 @@
 
 @if (_isCreator)
 {
-    <p><button onclick="DeleteGame">Delete game</button></p>
+    <p><button @onclick="DeleteGame">Delete game</button></p>
 }
 
 @if (_exception is not null)
@@ -23,7 +23,7 @@ else if (_username is null || !game.Users.ContainsKey(_username))
 else if (_isCreator && game.Status == GameStatus.WaitingForCreator)
 {
     <p>Joined @game.Users.Count (@(string.Join(", ", game.Users.Keys)))</p>
-    <button @onclick="RunGame">Start game</button>
+    <button @onclick="StartGame">Start game</button>
     <p><a href="/Game/@GameId">Link to game: /Game/@GameId</a></p>
 }
 else if (game.Status == GameStatus.WaitingForPlayers)
@@ -35,6 +35,68 @@ else if (game.Status == GameStatus.WaitingForPlayers)
 else if (game.Status == GameStatus.Playing)
 {
     <p>Playing...</p>
+    @* @if (game.Rounds.Any()) *@
+    @* { *@
+    @*     <p>Info about my success in last round</p> *@
+    @* } *@
+    
+    <p>Previous round data</p>
+    
+    @if (game.TryFindDidIWinInPreviousRound(_username, out var win))
+    {
+        <p>I won in prev round: @(win)</p>
+    }
+    
+    <p>Some information</p>
+    
+    @if (game.HaveIWished(_username) && game.HaveIAnswered(_username))
+    {
+        <p>You voted. Waiting for others to vote.</p>
+    }
+    else
+    {
+        
+        if (!game.HaveIAnswered(_username))
+        {
+            <p>You are guessing a number asked by @game.WhosValueAmIGuessing(_username)</p>
+            @if (game.TryGetMyHint(_username, out var hint))
+            {
+                <p>You even have a hint: the hint is @(hint)</p>
+            }
+            <p>
+                <input type="checkbox" @bind="_myAnswer" id="checkboxMyAnswer" />
+                <label for="checkboxMyAnswer">I think, they wished for a True</label>
+                <button @onclick="Answer">Submit</button> @* todo here *@
+            </p>
+        }
+        
+        if (!game.HaveIWished(_username))
+        {
+            
+            <p>You are guessing a number for @game.WhoAmIGuessingFor(_username)</p>
+            <p>
+                <ul>
+                    <li>
+                        <input type="checkbox" @bind="_myWish" id="checkboxMyWish" />
+                        <label for="checkboxMyWish">I wish a True</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" @bind="_myWishShowHint" id="checkboxWannaHint" />
+                        <label for="checkboxWannaHint">I will make a hint</label>
+                    </li>
+                    @if (_myWishShowHint)
+                    {
+                        <li>
+                            <input type="checkbox" @bind="_myWishHint" id="checkboxMyHint" />
+                            <label for="checkboxMyHint">My hint is True</label>
+                        </li>
+                    }
+                    <button @onclick="Guess">Submit</button> @* todo here *@
+                </ul>
+            </p>
+        }
+
+    }
 }
 else
 {
@@ -46,15 +108,6 @@ else
 <br />
 <p>HashCode: @GetHashCode()</p>
 
-
-<script>
-    window.onbeforeunload = function(event) {
-        // Call the Blazor method to handle the exit event
-        DotNet.invokeMethodAsync('BluffGame', 'HandleUserExit');
-        return null;
-    };
-
-</script>
 
 @code {
     [Parameter]
@@ -68,6 +121,11 @@ else
     private bool _isCreator = false;
 
     private Exception? _exception = null;
+
+    private bool _myAnswer = false;
+    private bool _myWish = false;
+    private bool _myWishShowHint = false;
+    private bool _myWishHint = false;
 
     protected override void OnInitialized()
     {
@@ -90,7 +148,7 @@ else
         }
         else if (game.Status == GameStatus.WaitingForPlayers)
         {
-            
+            // Empty?
         }
         else
         {
@@ -119,13 +177,15 @@ else
         UpdateAllPages();
     }
 
-    private void RunGame()
+    private void StartGame()
     {
         if (!_isCreator)
         {
             _exception = new Exception("You cannot run game");
             return;
         }
+
+        game.NewRound();
         game.Status = GameStatus.Playing;
         UpdateAllPages();
     }
@@ -146,6 +206,39 @@ else
 
         Game.Games.Remove(GameId);
         UpdateAllPages();
+    }
+
+    private void Answer()
+    {
+        game.AnswerValue(_username!, _myAnswer);
+        _myAnswer = false;
+    }
+    private void Guess()
+    {
+        bool? hint = _myWishShowHint ? _myWishHint : null;
+        game.WishValue(_username!, _myWish, hint);
+        _myWish = false;
+        _myWishHint = false;
+        _myWishShowHint = true;
+    }
+
+    private void MakeNewRoundIfNeeded()
+    {
+        if (!WeNeedNewRound()) return;
+
+        game.NewRound();
+    }
+
+    private bool WeNeedNewRound()
+    {
+        if (!game.Rounds.Any()) throw new Exception("Unreachable exception: no rounds");
+
+        if (game.Rounds.Count == 1)
+        {
+            return game.Rounds.Last().AllWished;
+        }
+
+        return game.Rounds.Last().AllWished && game.Rounds[^2].AllAnswered;
     }
 
 }

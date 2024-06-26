@@ -8,9 +8,9 @@ public class Couple
     public string UserAnswers { get; init; }
     
     /// <summary> Raw value </summary>
-    public bool Wished { get; set; }
+    public bool? Wished { get; set; } = null;
     /// <summary> Raw value </summary>
-    public bool Answered { get; set; }
+    public bool? Answered { get; set; } = null;
     /// <summary> Raw value </summary>
     public bool? Hint { get; set; }
 
@@ -18,8 +18,6 @@ public class Couple
     public bool? Lied => Hint is null ? null : Hint == Wished;
 
     /// <summary> Calculated value </summary>
-    public bool Guessed => Wished == Answered;
-    
-    public bool IsFinished { get; set; } = false;
+    public bool Guessed => Wished is not null && Wished == Answered;
     
 }

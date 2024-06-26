@@ -4,6 +4,10 @@ namespace BluffGame.Models;
 
 //todo remove games after something
 
+// You ALWAYS
+// * WISH for value in LAST round
+// * Answer for a value in Round[^2] (2ND LAST)
+
 public class Game
 {
     public static Dictionary<string, Game> Games { get; } = new();
@@ -23,10 +27,9 @@ public class Game
     {
         foreach (var round in Rounds)
         {
-            if (!round.IsFinished) continue;
+            if (!round.IsArchived) continue;
             foreach (var couple in round.Couples)
             {
-                if (!couple.IsFinished) continue; // It's impossible, but still
                 yield return couple;
             }
         }
@@ -53,6 +56,110 @@ public class Game
         return (double)lied.Count() / totalCount;
     }
     
+
+    public bool HaveIWished(string user)
+    {
+        if (!Rounds.Any()) return true;
+        
+        return Rounds
+            .Last()
+            .Couples
+            .Exists(x => x.UserAsks == user && x.Wished is not null);
+
+    }
+    public bool HaveIAnswered(string user)
+    {
+        if (Rounds.Count < 2) return true;
+        
+        return Rounds[^2]
+            .Couples
+            .Exists(x => x.UserAnswers == user && x.Answered is not null);
+
+    }
+
+    public bool TryFindDidIWinInPreviousRound(string user, out bool win)
+    {
+        if (Rounds.Count < 2)
+        {
+            win = false;
+            return false;
+        }
+
+        win = Rounds[^2]
+            .Couples
+            .FirstOrDefault(x => x.UserAnswers == user)?.Guessed == true;
+        return true;
+    }
+
+    public bool IsRoundFinished()
+    {
+        if (!Rounds.Any()) return true;
+
+        return Rounds.Last().Couples.All(x => x.Answered is not null);
+    }
+
+    public Round NewRound()
+    {
+        var users = Users.Keys.ToList();
+        Helpers.Shuffle(users);
+        var couples = new List<Couple>(users.Count);
+        for (int i = 0; i < users.Count; i++)
+        {
+            couples.Add(new()
+            {
+                UserAsks = users[i],
+                UserAnswers = users[(i + 1) % users.Count],
+            });
+        }
+
+        return new Round() { Couples = couples };
+    }
+
+    public string? WhosValueAmIGuessing(string username)
+    {
+        // todo also return some data
+        if (Rounds.Count < 2) return null;
+        return Rounds[^2].Couples.First(x => x.UserAnswers == username).UserAsks;
+    }
+    public bool TryGetMyHint(string username, out bool hint)
+    {
+        if (Rounds.Count < 2)
+        {
+            hint = false;
+            return false;
+        }
+
+        var realHint = Rounds[^2].Couples.First(x => x.UserAnswers == username).Hint;
+
+        if (realHint is null)
+        {
+            hint = false;
+            return false;
+        }
+
+        hint = realHint.Value;
+        return true;
+
+    }
+    public string WhoAmIGuessingFor(string username)
+    {
+        if (!Rounds.Any()) throw new Exception("No rounds.");
+
+        return Rounds.Last().Couples.First(x => x.UserAsks == username).UserAnswers;
+    }
+
+    public void WishValue(string username, bool value, bool? hint)
+    {
+        if (!Rounds.Any()) throw new Exception("No rounds.");
+        var couple = Rounds.Last().Couples.First(x => x.UserAsks == username);
+        couple.Wished = value;
+        couple.Hint = hint;
+    }
+    public void AnswerValue(string username, bool value)
+    {
+        if (Rounds.Count < 2) throw new Exception("Cannot answer.");
+        Rounds[^2].Couples.First(x => x.UserAnswers == username).Answered = value;
+    }
 
     public override int GetHashCode()
     {
