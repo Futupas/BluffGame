@@ -10,6 +10,7 @@
     <p><button @onclick="DeleteGame">Delete game</button></p>
 }
 
+
 @if (_exception is not null)
 {
     <p>Exception happened:</p>
@@ -20,9 +21,10 @@ else if (_username is null || !game.Users.ContainsKey(_username))
     <p><input type="text" @bind="_username" placeholder="Enter username" /></p>
     <p><button @onclick="SubmitUsername">Submit username</button></p>
 }
-else if (_isCreator && game.Status == GameStatus.WaitingForCreator)
+else if (_isCreator && (game.Status == GameStatus.WaitingForCreator || game.Status == GameStatus.WaitingForPlayers))
 {
     <p>Joined @game.Users.Count (@(string.Join(", ", game.Users.Keys)))</p>
+    <p>Waiting for others to join</p>
     <button @onclick="StartGame">Start game</button>
     <p><a href="/Game/@GameId">Link to game: /Game/@GameId</a></p>
 }
@@ -34,13 +36,9 @@ else if (game.Status == GameStatus.WaitingForPlayers)
 }
 else if (game.Status == GameStatus.Playing)
 {
-    <p>Playing...</p>
-    @* @if (game.Rounds.Any()) *@
-    @* { *@
-    @*     <p>Info about my success in last round</p> *@
-    @* } *@
+    <p>Playing round @game.Rounds.Count</p>
     
-    <p>Previous round data</p>
+    @* <p>Previous round data</p> *@
     
     @if (game.TryFindDidIWinInPreviousRound(_username, out var win))
     {
@@ -124,13 +122,13 @@ else
 
     private bool _myAnswer = false;
     private bool _myWish = false;
-    private bool _myWishShowHint = false;
+    private bool _myWishShowHint = true;
     private bool _myWishHint = false;
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        if (!Game.Games.TryGetValue(GameId, out game))
+        if (!Game.Games.TryGetValue(GameId, out game!))
         {
             _exception = new Exception("The game does not exist.");
             return;
@@ -212,6 +210,7 @@ else
     {
         game.AnswerValue(_username!, _myAnswer);
         _myAnswer = false;
+        MakeNewRoundIfNeeded();
     }
     private void Guess()
     {
@@ -220,6 +219,7 @@ else
         _myWish = false;
         _myWishHint = false;
         _myWishShowHint = true;
+        MakeNewRoundIfNeeded();
     }
 
     private void MakeNewRoundIfNeeded()
@@ -227,6 +227,7 @@ else
         if (!WeNeedNewRound()) return;
 
         game.NewRound();
+        UpdateAllPages();
     }
 
     private bool WeNeedNewRound()

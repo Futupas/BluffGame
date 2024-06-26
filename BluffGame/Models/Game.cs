@@ -59,7 +59,7 @@ public class Game
 
     public bool HaveIWished(string user)
     {
-        if (!Rounds.Any()) return true;
+        if (!Rounds.Any()) throw new Exception("Unreachable exception: no rounds");
         
         return Rounds
             .Last()
@@ -112,7 +112,10 @@ public class Game
             });
         }
 
-        return new Round() { Couples = couples };
+        var round = new Round() { Couples = couples };
+        Rounds.Add(round);
+
+        return round;
     }
 
     public string? WhosValueAmIGuessing(string username)
