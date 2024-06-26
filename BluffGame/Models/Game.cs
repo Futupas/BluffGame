@@ -1,13 +1,22 @@
+using BluffGame.Pages;
+
 namespace BluffGame.Models;
+
+//todo remove games after something
 
 public class Game
 {
-    public Guid Id { get; private init; } = Guid.NewGuid();
+    public static Dictionary<string, Game> Games { get; } = new();
 
-    public Dictionary<string, User> Users { get; } = new();
+
+    public Guid Id { get; private init; } = Guid.NewGuid();
+    public Guid CreatorGuid { get; private init; } = Guid.NewGuid();
+
+    public GameStatus Status { get; set; } = GameStatus.WaitingForCreator;
+
+    public Dictionary<string, GamePage> Users { get; } = new();
 
     public List<Round> Rounds { get; } = new();
-
     
     
     private IEnumerable<Couple> GetArchiveCouples()
@@ -44,4 +53,22 @@ public class Game
         return (double)lied.Count() / totalCount;
     }
     
+
+    public override int GetHashCode()
+    {
+        return Id.GetHashCode();
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj is not Game that) return false;
+        return this.Id == that.Id;
+    }
+
+    public override string ToString()
+    {
+        return Id.ToString();
+    }
 }

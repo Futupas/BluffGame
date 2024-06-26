@@ -21,6 +21,5 @@ public class Couple
     public bool Guessed => Wished == Answered;
     
     public bool IsFinished { get; set; } = false;
-
     
 }

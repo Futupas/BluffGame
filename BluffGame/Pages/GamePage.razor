@@ -1,0 +1,151 @@
+@page "/Game/{GameId}/{CreatorGuid?}"
+@using BluffGame.Models
+
+<h3>Game</h3>
+
+<p>Game guid: @GameId, status @game.Status, is_creator: @_isCreator</p>
+
+@if (_isCreator)
+{
+    <p><button onclick="DeleteGame">Delete game</button></p>
+}
+
+@if (_exception is not null)
+{
+    <p>Exception happened:</p>
+    <p>@_exception.ToString()</p>
+}
+else if (_username is null || !game.Users.ContainsKey(_username))
+{
+    <p><input type="text" @bind="_username" placeholder="Enter username" /></p>
+    <p><button @onclick="SubmitUsername">Submit username</button></p>
+}
+else if (_isCreator && game.Status == GameStatus.WaitingForCreator)
+{
+    <p>Joined @game.Users.Count (@(string.Join(", ", game.Users.Keys)))</p>
+    <button @onclick="RunGame">Start game</button>
+    <p><a href="/Game/@GameId">Link to game: /Game/@GameId</a></p>
+}
+else if (game.Status == GameStatus.WaitingForPlayers)
+{
+    <p>Joined @game.Users.Count (@(string.Join(", ", game.Users.Keys)))</p>
+    <p>Waiting for others to join</p>
+    <p><a href="/Game/@GameId">Link to game: /Game/@GameId</a></p>
+}
+else if (game.Status == GameStatus.Playing)
+{
+    <p>Playing...</p>
+}
+else
+{
+    <p>Some error happened</p>
+}
+
+
+<br />
+<br />
+<p>HashCode: @GetHashCode()</p>
+
+
+<script>
+    window.onbeforeunload = function(event) {
+        // Call the Blazor method to handle the exit event
+        DotNet.invokeMethodAsync('BluffGame', 'HandleUserExit');
+        return null;
+    };
+
+</script>
+
+@code {
+    [Parameter]
+    public string GameId { get; init; }
+    [Parameter]
+    public string? CreatorGuid { get; init; }
+
+    private Game game;
+
+    private string? _username = null;
+    private bool _isCreator = false;
+
+    private Exception? _exception = null;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (!Game.Games.TryGetValue(GameId, out game))
+        {
+            _exception = new Exception("The game does not exist.");
+            return;
+        }
+
+        if (game.Status == GameStatus.WaitingForCreator)
+        {
+            if (CreatorGuid is null || game.CreatorGuid.ToString() != CreatorGuid)
+            {
+                _exception = new Exception("Seems like you are not the creator, you cannot join the game right now.");
+                return;
+            }
+
+            _isCreator = true;
+        }
+        else if (game.Status == GameStatus.WaitingForPlayers)
+        {
+            
+        }
+        else
+        {
+            _exception = new Exception($"Game is in bad status: {game.Status}");
+            return;
+        }
+    }
+
+    private void SubmitUsername()
+    {
+        if (string.IsNullOrEmpty(_username)) return;
+
+        if (game.Users.ContainsKey(_username))
+        {
+            _exception = new Exception("Username is already taken.");
+            return;
+        }
+
+        game.Users[_username] = this;
+
+        if (_isCreator)
+        {
+            game.Status = GameStatus.WaitingForPlayers;
+        }
+        
+        UpdateAllPages();
+    }
+
+    private void RunGame()
+    {
+        if (!_isCreator)
+        {
+            _exception = new Exception("You cannot run game");
+            return;
+        }
+        game.Status = GameStatus.Playing;
+        UpdateAllPages();
+    }
+
+    private Task UpdateAllPages()
+    {
+        var tasks = game.Users.Values.Select(x => x.InvokeAsync(x.StateHasChanged));
+        return Task.WhenAll(tasks);
+    }
+
+    private void DeleteGame()
+    {
+        if (!_isCreator)
+        {
+            _exception = new Exception("You cannot run game");
+            return;
+        }
+
+        Game.Games.Remove(GameId);
+        UpdateAllPages();
+    }
+
+}

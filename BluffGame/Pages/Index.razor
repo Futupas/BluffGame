@@ -1,9 +1,29 @@
 ﻿@page "/"
+@using BluffGame.Models
+
+@inject NavigationManager NavigationManager
+
 
 <PageTitle>Index</PageTitle>
 
-<h1>Hello, world!</h1>
+@* <h1>Hello, world!</h1> *@
+@* *@
+@* Welcome to your new app. *@
+@* *@
+@* <SurveyPrompt Title="How is Blazor working for you?"/> *@
 
-Welcome to your new app.
+<button @onclick="CreateNewGame">New Game</button>
 
-<SurveyPrompt Title="How is Blazor working for you?"/>
+
+
+@code {
+
+    private void CreateNewGame()
+    {
+        var game = new Game();
+        Game.Games[game.Id.ToString()] = game;
+        
+        NavigationManager.NavigateTo($"/Game/{game.Id}/{game.CreatorGuid}");
+    }
+
+}
