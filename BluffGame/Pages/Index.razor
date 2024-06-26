@@ -21,7 +21,6 @@
     private void CreateNewGame()
     {
         var game = new Game();
-        Game.Games[game.Id.ToString()] = game;
         
         NavigationManager.NavigateTo($"/Game/{game.Id}/{game.CreatorGuid}");
     }

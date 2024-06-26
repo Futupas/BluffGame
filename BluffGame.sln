@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BluffGame", "BluffGame\BluffGame.csproj", "{1EA68E85-1F71-4027-83B5-A8C9A870F05B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BluffGame.UnitTests", "BluffGame.UnitTests\BluffGame.UnitTests.csproj", "{6BB5BF0B-B00B-484F-9C4C-72C624CA4524}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{1EA68E85-1F71-4027-83B5-A8C9A870F05B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1EA68E85-1F71-4027-83B5-A8C9A870F05B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1EA68E85-1F71-4027-83B5-A8C9A870F05B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BB5BF0B-B00B-484F-9C4C-72C624CA4524}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BB5BF0B-B00B-484F-9C4C-72C624CA4524}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BB5BF0B-B00B-484F-9C4C-72C624CA4524}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BB5BF0B-B00B-484F-9C4C-72C624CA4524}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

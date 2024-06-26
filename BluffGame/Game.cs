@@ -1,7 +1,8 @@
 using BluffGame.Exceptions;
+using BluffGame.Models;
 using BluffGame.Pages;
 
-namespace BluffGame.Models;
+namespace BluffGame;
 
 //todo remove games after something
 
@@ -22,6 +23,11 @@ public class Game
     public Dictionary<string, GamePage> Users { get; } = new();
 
     public List<Round> Rounds { get; } = new();
+
+    public Game()
+    {
+        Games[Id.ToString()] = this;
+    }
     
     
     private IEnumerable<Couple> GetArchiveCouples()
