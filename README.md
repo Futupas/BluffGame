@@ -2,7 +2,6 @@
 A simple bluff game for a company (trust/no)
 
 ## Tasks
-* LieRate
 * Normal exit
 * UnreachableException
 * Design
@@ -10,4 +9,4 @@ A simple bluff game for a company (trust/no)
 * Some tests
 * QR code
 * Docker
-* Information about round
+* Forbid 1 player (mb)

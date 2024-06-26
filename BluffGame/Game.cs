@@ -25,19 +25,15 @@ public class Game
     
     private IEnumerable<Couple> GetArchiveCouples()
     {
-        foreach (var round in Rounds)
-        {
-            if (!round.IsArchived) continue;
-            foreach (var couple in round.Couples)
-            {
-                yield return couple;
-            }
-        }
+        return Rounds.Where(round => round.IsArchived).SelectMany(round => round.Couples);
     }
 
     public double GetUserGuessRate(string user)
     {
-        var total = GetArchiveCouples().Where(x => x.UserAnswers == user);
+        var total = Rounds
+            .SelectMany(x => x.Couples)
+            .Where(x => x.UserAnswers == user && x.Wished is not null && x.Answered is not null); 
+        // var total = GetArchiveCouples().Where(x => x.UserAnswers == user);
         var guessed = total.Where(x => x.Guessed);
 
         var totalCount = total.Count();
@@ -47,7 +43,10 @@ public class Game
     }
     public double GetUserLieRate(string user)
     {
-        var total = GetArchiveCouples().Where(x => x.UserAsks == user && x.Lied is not null);
+        // var total = GetArchiveCouples().Where(x => x.UserAsks == user && x.Lied is not null);
+        var total = Rounds
+            .SelectMany(x => x.Couples)
+            .Where(x => x.UserAnswers == user && x.Wished is not null && x.Answered is not null); // maybe remove "answered here"
         var lied = total.Where(x => x.Lied == true);
 
         var totalCount = total.Count();
@@ -100,12 +99,12 @@ public class Game
         return result is not null;
     }
 
-    public bool IsRoundFinished()
-    {
-        if (!Rounds.Any()) return true;
-
-        return Rounds.Last().Couples.All(x => x.Answered is not null);
-    }
+    // public bool IsRoundFinished()
+    // {
+    //     if (!Rounds.Any()) return true;
+    //
+    //     return Rounds.Last().Couples.All(x => x.Answered is not null);
+    // }
 
     public Round NewRound()
     {

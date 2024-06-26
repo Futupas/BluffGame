@@ -39,7 +39,23 @@ else if (game.Status == GameStatus.Playing)
 {
     <p>Playing round @game.Rounds.Count</p>
     
-    @* <p>Previous round data</p> *@
+    @if (game.Rounds.Count > 1)
+    {
+        <ul>
+            <li>
+                Your guess rate: @game.GetUserGuessRate(_username);
+            </li>
+            <li>
+                @game.WhosValueAmIGuessing(_username)'s guess rate: @game.GetUserGuessRate(game.WhosValueAmIGuessing(_username)!);
+            </li>
+            <li>
+                Your lie rate: @game.GetUserLieRate(_username);
+            </li>
+            <li>
+                @game.WhosValueAmIGuessing(_username)'s lie rate: @game.GetUserLieRate(game.WhosValueAmIGuessing(_username)!);
+            </li>
+        </ul>
+    }
     
     @if (game.TryFindDidIWinInPreviousRound(_username, out var win))
     {
