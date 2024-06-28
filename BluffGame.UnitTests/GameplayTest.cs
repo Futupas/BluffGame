@@ -6,39 +6,53 @@ namespace BluffGame.UnitTests;
 
 public class GameplayTest
 {
-    //todo hints 
+    private const int DOUBLE_COMPARSION_TOLERANCE = 4; // 4 digits after delimiter
     
     private readonly Random random = new ();
     private bool RandomBool() => random.NextDouble() >= .5;
+    private bool? RandomNullBool() => random.Next(3) switch
+    {
+        0 => true,
+        1 => false,
+        _ => null
+    };
     
     [Theory]
     [InlineData(2, 2)]
     [InlineData(3, 5)]
     [InlineData(10, 10)]
     [InlineData(32, 128)]
-    public void TestGuessRate(int playersCount, int roundsCount)
+    public void TestGuessRateAndLieRate(int playersCount, int roundsCount)
     {
         var game = new Game();
 
-        var data = new Dictionary<string, StatisticsRow>();
+        var guessStats = new Dictionary<string, StatsRow>();
+        var lieStats = new Dictionary<string, StatsRow>();
 
         // Initialize game
-        InitializeGame(playersCount, game, data);
+        InitializeGame(playersCount, game, guessStats, lieStats);
 
         Assert.Equal(playersCount, game.Users.Count);
 
         var wishes = new Dictionary<string, bool>();
-        PlayRounds(roundsCount, game, data, wishes);
+        PlayRounds(roundsCount, game, guessStats, lieStats, wishes);
         
-        // Checks
-        foreach (var (username, stats) in data)
+        // Checks (guess)
+        foreach (var (username, stats) in guessStats)
         {
             var guessRate = game.GetUserGuessRate(username);
-            Assert.Equal(stats.GetGuessRate(), guessRate, 3);
+            Assert.Equal(stats.GetRate(), guessRate, DOUBLE_COMPARSION_TOLERANCE);
+        }
+        
+        // Checks (lie)
+        foreach (var (username, stats) in lieStats)
+        {
+            var lieRate = game.GetUserLieRate(username);
+            Assert.Equal(stats.GetRate(), lieRate, DOUBLE_COMPARSION_TOLERANCE);
         }
     }
 
-    private static void InitializeGame(int playersCount, Game game, Dictionary<string, StatisticsRow> data)
+    private static void InitializeGame(int playersCount, Game game, Dictionary<string, StatsRow> guessStats, Dictionary<string, StatsRow> lieStats)
     {
         for (int i = 0; i < playersCount; i++)
         {
@@ -48,14 +62,15 @@ public class GameplayTest
 
             var username = "player" + i;
 
-            data[username] = new();
+            guessStats[username] = new();
+            lieStats[username] = new();
             game.Users[username] = gamePage;
         }
 
         game.NewRound();
         game.Status = GameStatus.Playing;
     }
-    private void PlayRounds(int roundsCount, Game game, Dictionary<string, StatisticsRow> data, Dictionary<string, bool> wishes)
+    private void PlayRounds(int roundsCount, Game game, Dictionary<string, StatsRow> guessStats, Dictionary<string, StatsRow> lieStats, Dictionary<string, bool> wishes)
     {
         for (int i = 0; i < roundsCount; i++)
         {
@@ -70,10 +85,10 @@ public class GameplayTest
                     
                     
                     // Add values
-                    data[username].All++;
+                    guessStats[username].All++;
                     if (wishes[opponent] == myValue)
                     {
-                        data[username].Guessed++;
+                        guessStats[username].True++;
                     }
                 }
             }
@@ -83,7 +98,14 @@ public class GameplayTest
             {
                 var wish = RandomBool();
                 wishes[username] = wish;
-                game.WishValue(username, wish, null);
+                var hint = RandomNullBool();
+                game.WishValue(username, wish, hint);
+
+                lieStats[username].All++;
+                if (hint is not null && hint.Value != wish)
+                {
+                    lieStats[username].True++;
+                }
             }
 
             game.NewRound();

@@ -53,7 +53,7 @@ public class Game
         // var total = GetArchiveCouples().Where(x => x.UserAsks == user && x.Lied is not null);
         var total = Rounds
             .SelectMany(x => x.Couples)
-            .Where(x => x.UserAnswers == user && x.Wished is not null && x.Answered is not null); // maybe remove "answered here"
+            .Where(x => x.UserAsks == user && x.Wished is not null);
         var lied = total.Where(x => x.Lied == true);
 
         var totalCount = total.Count();
