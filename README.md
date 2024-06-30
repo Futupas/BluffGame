@@ -13,4 +13,6 @@ A simple bluff game for a company (trust/no)
 * Read stats
 * Normal questions
 * Shorter GUID for game
-
+* Login by this
+* RandomChoose, Choose2
+* 

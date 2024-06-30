@@ -25,4 +25,22 @@ public static class Helpers
         return $"data:image/png;base64,{base64Image}";
     }
 
+    public static T RandomChoose<T>(IReadOnlyList<T> list)
+    {
+        var index = Random.Shared.Next(list.Count);
+        return list[index];
+    }
+    
+    
+    public static (T option1, T option2) RandomChoose2<T>(IReadOnlyList<T> list)
+    {
+        if (list.Distinct().Count() < 2) return (list[0], list[0]);
+        
+        var option1 = RandomChoose(list)!;
+        var option2 = RandomChoose(list)!;
+        while(option1.Equals(option2)) option2 = RandomChoose(list);
+
+        return (option1, option2);
+    }
+
 }
