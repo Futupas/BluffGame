@@ -109,11 +109,26 @@ public class Game
             });
         }
 
-        var questions = _config.GetSection("questions").Get<List<QuestionModel>>();
+        // var questions = _config.GetSection("questions").Get<List<QuestionModel>>();
+        // var questionIndex = Random.Shared.Next(questions.Count);
+        // var question = questions[questionIndex];
+        
+        var questions = _config.GetSection("onlyQuestions").Get<IReadOnlyList<string>>();
         var questionIndex = Random.Shared.Next(questions.Count);
         var question = questions[questionIndex];
+        
+        var options = _config.GetSection("onlyAnswers").Get<IReadOnlyList<string>>();
+        var optionIndex1 = Random.Shared.Next(options.Count);
+        var option1 = options[optionIndex1];
+        var optionIndex2 = Random.Shared.Next(options.Count);
+        var option2 = options[optionIndex2];
 
-        var round = new Round() { Couples = couples, Question = question };
+        var round = new Round() { Couples = couples, Question = new()
+        {
+            Question = question,
+            Option1 = option1,
+            Option2 = option2,
+        } };
         Rounds.Add(round);
 
         return round;
