@@ -119,7 +119,7 @@ public class Game
     public Round NewRound()
     {
         var users = Users.Keys.ToList();
-        Helpers.Shuffle(users);
+        Helpers.ShuffleList(users);
         var couples = new List<Couple>(users.Count);
         for (int i = 0; i < users.Count; i++)
         {

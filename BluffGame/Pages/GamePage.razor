@@ -1,6 +1,9 @@
 @page "/Game/{GameId}/{CreatorGuid?}"
+
 @using BluffGame.Exceptions
 @using BluffGame.Models
+
+@inject NavigationManager Navigation
 
 <h3>Game</h3>
 
@@ -12,6 +15,9 @@
 {
     <p><button @onclick="DeleteGame">Delete game</button></p>
 }
+
+<p><a href="/Game/@GameId">Link to game: /Game/@GameId</a></p>
+<p><img src="@_qrCodeUrl" alt="/Game/@GameId" style="height: 200px;" /></p>
 
 
 @if (_exception is not null)
@@ -29,13 +35,11 @@ else if (_isCreator && game.Status is GameStatus.WaitingForCreator or GameStatus
     <p>Joined @game.Users.Count (@(string.Join(", ", game.Users.Keys)))</p>
     <p>Waiting for others to join</p>
     <button @onclick="StartGame">Start game</button>
-    <p><a href="/Game/@GameId">Link to game: /Game/@GameId</a></p>
 }
 else if (game.Status == GameStatus.WaitingForPlayers)
 {
     <p>Joined @game.Users.Count (@(string.Join(", ", game.Users.Keys)))</p>
     <p>Waiting for others to join</p>
-    <p><a href="/Game/@GameId">Link to game: /Game/@GameId</a></p>
 }
 else if (game.Status == GameStatus.Playing)
 {
@@ -128,6 +132,7 @@ else
     private string? _username = null;
     private bool _isCreator = false;
 
+    private string _qrCodeUrl;
 
     private Exception? _exception = null;
 
@@ -144,6 +149,8 @@ else
             _exception = new Exception("The game does not exist.");
             return;
         }
+
+        _qrCodeUrl = Helpers.GenerateQRCode(Navigation.BaseUri + "Game/" + GameId);
 
         if (game.Status == GameStatus.WaitingForCreator)
         {
