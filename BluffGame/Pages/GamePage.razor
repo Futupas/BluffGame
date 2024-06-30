@@ -1,5 +1,4 @@
 @page "/Game/{GameId}/{CreatorGuid?}"
-@* @using System.Text.Json *@
 @using BluffGame.Exceptions
 @using BluffGame.Models
 
@@ -110,11 +109,6 @@ else
 {
     <p>Some error happened</p>
 }
-            
-
-@* <pre> *@
-@*     @(JsonSerializer.Serialize(game, new JsonSerializerOptions() { WriteIndented = true })) *@
-@* </pre> *@
 
 <br />
 <br />
