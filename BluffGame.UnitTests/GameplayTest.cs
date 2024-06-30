@@ -24,6 +24,7 @@ public class GameplayTest
     [InlineData(32, 128)]
     [InlineData(8, 256)]
     [InlineData(8, 1024)]
+    [InlineData(7, 4097)]
     public void TestGuessRateAndLieRate(int playersCount, int roundsCount)
     {
         var game = new Game(CONFIG);
