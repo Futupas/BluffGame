@@ -4,6 +4,7 @@
 @using BluffGame.Models
 
 @inject NavigationManager Navigation
+@inject IConfiguration _config
 
 <h3>Game</h3>
 
@@ -14,7 +15,7 @@
 @if (_isCreator)
 {
     <p>
-        <button @onclick="FinishGame">Finish game</button>
+        <button @onclick="FinishGame">Finish game and see stats</button>
         <button @onclick="DeleteGame">Delete game</button>
     </p>
 }
@@ -52,17 +53,24 @@ else if (_game.Status == GameStatus.Playing)
     {
         <ul>
             <li>
-                Your guess rate: @_game.GetUserGuessRate(_username);
+                Your guess rate: @Math.Round(_game.GetUserGuessRate(_username), 2);
             </li>
             <li>
-                @_game.WhosValueAmIGuessing(_username)'s guess rate: @_game.GetUserGuessRate(_game.WhosValueAmIGuessing(_username)!);
+                @_game.WhosValueAmIGuessing(_username)'s guess rate: @Math.Round(_game.GetUserGuessRate(_game.WhosValueAmIGuessing(_username)!), 2);
             </li>
             <li>
-                Your lie rate: @_game.GetUserLieRate(_username);
+                Your lie rate: @Math.Round(_game.GetUserLieRate(_username), 2);
             </li>
-            <li>
-                @_game.WhosValueAmIGuessing(_username)'s lie rate: @_game.GetUserLieRate(_game.WhosValueAmIGuessing(_username)!);
-            </li>
+            @if (_game.GetUserLieRate(_username) <= _config.GetSection("maxLieCountToShowOpponentsOne").Get<double>())
+            {
+                <li>
+                    @_game.WhosValueAmIGuessing(_username)'s lie rate: @Math.Round(_game.GetUserLieRate(_game.WhosValueAmIGuessing(_username)!), 2);
+                </li>
+            }
+            else
+            {
+                <li>You lie too much to see @_game.WhosValueAmIGuessing(_username)'s lie rate;</li>
+            }
         </ul>
     }
     

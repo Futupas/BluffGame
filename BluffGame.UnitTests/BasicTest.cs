@@ -6,7 +6,7 @@ public class BasicTest
 {
     private void RemoveGame(Game game)
     {
-        // Assert.True(Game.Games.Remove(game.Id));
+        // Assert.True(Game.Games.Remove(game.Id)); // Sometimes it fails and IDK why
         Game.Games.Remove(game.Id);
     }
 
