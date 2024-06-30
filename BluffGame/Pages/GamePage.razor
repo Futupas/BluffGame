@@ -92,7 +92,7 @@ else if (game.Status == GameStatus.Playing)
             </p>
         }
         
-        if (!game.HaveIWished(_username))
+        if (!game.HaveIWished(_username) && _answered)
         {
             
             <p>@game.Rounds.Last().Question.Question (@game.WhoAmIGuessingFor(_username) will answer)</p>
@@ -107,7 +107,7 @@ else if (game.Status == GameStatus.Playing)
                 <button disabled="@(_myWishShowHint && !_myWishHint)" onclick="@(() => { _myWishShowHint = true; _myWishHint = false; })">Hint: @game.Rounds.Last().Question.Option2</button>
             </p>
             <p>
-                <button @onclick="Guess">Submit</button>
+                <button @onclick="Wish">Submit</button>
             </p>
         }
 
@@ -142,6 +142,8 @@ else
     private bool _myWish = false;
     private bool _myWishShowHint = true;
     private bool _myWishHint = false;
+
+    private bool _answered = true;
 
     protected override void OnInitialized()
     {
@@ -230,15 +232,17 @@ else
     {
         game.AnswerValue(_username!, _myAnswer);
         _myAnswer = false;
+        _answered = true;
         MakeNewRoundIfNeeded();
     }
-    private void Guess()
+    private void Wish()
     {
         bool? hint = _myWishShowHint ? _myWishHint : null;
         game.WishValue(_username!, _myWish, hint);
         _myWish = false;
         _myWishHint = false;
         _myWishShowHint = true;
+        _answered = false;
         MakeNewRoundIfNeeded();
     }
 
