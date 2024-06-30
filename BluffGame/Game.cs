@@ -16,7 +16,7 @@ public class Game
     public static Dictionary<string, Game> Games { get; } = new();
 
 
-    public Guid Id { get; private init; } = Guid.NewGuid();
+    public string Id { get; private init; }
     public Guid CreatorGuid { get; private init; } = Guid.NewGuid();
 
     public GameStatus Status { get; set; } = GameStatus.WaitingForCreator;
@@ -28,13 +28,9 @@ public class Game
     public Game(IConfiguration config)
     {
         _config = config;
-        Games[Id.ToString()] = this;
-    }
-    
-    
-    private IEnumerable<Couple> GetArchiveCouples()
-    {
-        return Rounds.Where(round => round.IsArchived).SelectMany(round => round.Couples);
+        Id = Helpers.GenerateShortId();
+        while(Games.ContainsKey(Id)) Id = Helpers.GenerateShortId();
+        Games[Id] = this;
     }
 
     public double GetUserGuessRate(string user)
@@ -61,7 +57,58 @@ public class Game
         
         return (double)lied.Count() / totalCount;
     }
-    
+
+    public GameStats? GetStatistics()
+    {
+        var guessRates = new List<(string username, double rate)>();
+        var lieRates = new List<(string username, double rate)>();
+        var guessCouplesRates = new List<(string who, string toWhom, double rate)>();
+        var lieCouplesRates = new List<(string who, string toWhom, double rate)>();
+
+        if (Rounds.Count < 3) return null;
+        
+        foreach (var username in Users.Keys)
+        {
+            guessRates.Add((username, GetUserGuessRate(username)));
+            lieRates.Add((username, GetUserLieRate(username)));
+        }
+
+        var lieCouples = Rounds.SelectMany(x => x.Couples).Where(x => x.Wished is not null);
+        var guessCouples = Rounds.SelectMany(x => x.Couples).Where(x => x.Answered is not null);
+        
+        foreach (var who in Users.Keys)
+        {
+            foreach (var toWhom in Users.Keys)
+            {
+                if (who == toWhom) continue;
+
+                // Lie
+                {
+                    var all = lieCouples.Where(x => x.UserAsks == who && x.UserAnswers == toWhom);
+                    var lied = all.Where(x => x.Lied == true);
+                    
+                    lieCouplesRates.Add((who, toWhom, (double)all.Count() / lied.Count()));
+                }
+                
+                //Guess
+                {
+                    var all = guessCouples.Where(x => x.UserAnswers == who && x.UserAsks == toWhom);
+                    var guessed = all.Where(x => x.Guessed);
+                    
+                    guessCouplesRates.Add((who, toWhom, (double)all.Count() / guessed.Count()));
+                }
+
+            }
+        }
+
+        return new GameStats()
+        {
+            GuessRates = guessRates.OrderByDescending(x => x.rate).ToList(),
+            LieRates = lieRates.OrderByDescending(x => x.rate).ToList(),
+            GuessCouplesRates = guessCouplesRates.OrderByDescending(x => x.rate).ToList(),
+            LieCouplesRates = lieCouplesRates.OrderByDescending(x => x.rate).ToList(),
+        };
+    }
 
     public bool HaveIWished(string user)
     {

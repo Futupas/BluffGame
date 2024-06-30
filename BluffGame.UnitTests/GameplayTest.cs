@@ -57,8 +57,8 @@ public class GameplayTest
         for (int i = 0; i < playersCount; i++)
         {
             var gamePage = i == 0
-                ? new GamePage() { GameId = game.Id.ToString(), CreatorGuid = game.CreatorGuid.ToString() }
-                : new GamePage() { GameId = game.Id.ToString() };
+                ? new GamePage() { GameId = game.Id, CreatorGuid = game.CreatorGuid.ToString() }
+                : new GamePage() { GameId = game.Id };
 
             var username = "player" + i;
 

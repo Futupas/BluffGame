@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using BluffGame.Models
 
 @inject NavigationManager NavigationManager
 @inject IConfiguration _config
@@ -6,19 +7,44 @@
 
 <PageTitle>Index</PageTitle>
 
-<a href="/Help">Help</a>
 
-<br />
+<p>
+    <a href="/Help">Help</a>
+</p>
 
-<button @onclick="CreateNewGame">New Game</button>
+<p>
+    <button @onclick="CreateNewGame">New Game</button>
+</p>
+
+<p>
+    <input type="text" @bind="_gameIdToJoin" />
+    @if (!string.IsNullOrEmpty(_gameIdToJoin) && !Game.Games.ContainsKey(_gameIdToJoin))
+    {
+        <p style="color: red;">This game (@_gameIdToJoin) does not exist</p>
+    }
+    else if (!string.IsNullOrEmpty(_gameIdToJoin) && Game.Games[_gameIdToJoin].Status is not GameStatus.WaitingForPlayers)
+    {
+        <p style="color: red;">You cannot join the game (@_gameIdToJoin) right now (wrong status)</p>
+    }
+    <button @onclick="JoinGame">Join game by code</button>
+</p>
+
+
 
 @code {
+    private string _gameIdToJoin = "";
 
     private void CreateNewGame()
     {
         var game = new Game(_config);
         
         NavigationManager.NavigateTo($"/Game/{game.Id}/{game.CreatorGuid}");
+    }
+
+    private void JoinGame()
+    {
+        if (string.IsNullOrEmpty(_gameIdToJoin)) return;
+        NavigationManager.NavigateTo($"/Game/{_gameIdToJoin}");
     }
 
 }

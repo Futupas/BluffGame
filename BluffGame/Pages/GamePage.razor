@@ -7,16 +7,19 @@
 
 <h3>Game</h3>
 
-<p>Game guid: @GameId, status @game.Status, is_creator: @_isCreator</p>
+<p>Game id: @GameId, status @_game.Status, is_creator: @_isCreator</p>
 
 <a href="/Help">Help</a>
 
 @if (_isCreator)
 {
-    <p><button @onclick="DeleteGame">Delete game</button></p>
+    <p>
+        <button @onclick="FinishGame">Finish game</button>
+        <button @onclick="DeleteGame">Delete game</button>
+    </p>
 }
 
-<p><a href="/Game/@GameId">Link to game: /Game/@GameId</a></p>
+<p><a href="/Game/@GameId">Game code: @GameId</a></p>
 <p><img src="@_qrCodeUrl" alt="/Game/@GameId" style="height: 200px;" /></p>
 
 
@@ -25,92 +28,138 @@
     <p>Exception happened:</p>
     <p>@_exception.ToString()</p>
 }
-else if (_username is null || !game.Users.ContainsKey(_username))
+else if (_username is null || !_game.Users.ContainsKey(_username))
 {
     <p><input type="text" @bind="_username" placeholder="Enter username" /></p>
     <p><button @onclick="SubmitUsername">Submit username</button></p>
 }
-else if (_isCreator && game.Status is GameStatus.WaitingForCreator or GameStatus.WaitingForPlayers)
+else if (_isCreator && _game.Status is GameStatus.WaitingForCreator or GameStatus.WaitingForPlayers)
 {
-    <p>Joined @game.Users.Count (@(string.Join(", ", game.Users.Keys)))</p>
+    <p>Joined @_game.Users.Count (@(string.Join(", ", _game.Users.Keys)))</p>
     <p>Waiting for others to join</p>
     <button @onclick="StartGame">Start game</button>
 }
-else if (game.Status == GameStatus.WaitingForPlayers)
+else if (_game.Status == GameStatus.WaitingForPlayers)
 {
-    <p>Joined @game.Users.Count (@(string.Join(", ", game.Users.Keys)))</p>
+    <p>Joined @_game.Users.Count (@(string.Join(", ", _game.Users.Keys)))</p>
     <p>Waiting for others to join</p>
 }
-else if (game.Status == GameStatus.Playing)
+else if (_game.Status == GameStatus.Playing)
 {
-    <p>Playing round @game.Rounds.Count</p>
+    <p>Playing round @_game.Rounds.Count</p>
     
-    @if (game.Rounds.Count > 1)
+    @if (_game.Rounds.Count > 1)
     {
         <ul>
             <li>
-                Your guess rate: @game.GetUserGuessRate(_username);
+                Your guess rate: @_game.GetUserGuessRate(_username);
             </li>
             <li>
-                @game.WhosValueAmIGuessing(_username)'s guess rate: @game.GetUserGuessRate(game.WhosValueAmIGuessing(_username)!);
+                @_game.WhosValueAmIGuessing(_username)'s guess rate: @_game.GetUserGuessRate(_game.WhosValueAmIGuessing(_username)!);
             </li>
             <li>
-                Your lie rate: @game.GetUserLieRate(_username);
+                Your lie rate: @_game.GetUserLieRate(_username);
             </li>
             <li>
-                @game.WhosValueAmIGuessing(_username)'s lie rate: @game.GetUserLieRate(game.WhosValueAmIGuessing(_username)!);
+                @_game.WhosValueAmIGuessing(_username)'s lie rate: @_game.GetUserLieRate(_game.WhosValueAmIGuessing(_username)!);
             </li>
         </ul>
     }
     
-    @if (game.TryFindDidIWinInPreviousRound(_username, out var win))
+    @if (_game.TryFindDidIWinInPreviousRound(_username, out var win))
     {
         <p>I won in prev round: @(win)</p>
     }
     
     <p>Some information</p>
     
-    @if (game.HaveIWished(_username) && game.HaveIAnswered(_username))
+    @if (_game.HaveIWished(_username) && _game.HaveIAnswered(_username))
     {
         <p>You voted. Waiting for others to vote.</p>
     }
     else
     {
         
-        if (!game.HaveIAnswered(_username))
+        if (!_game.HaveIAnswered(_username))
         {
-            <p>@game.WhosValueAmIGuessing(_username) asked: @game.Rounds[^2].Question.Question</p>
-            @if (game.TryGetMyHint(_username, out var hint))
+            <p>@_game.WhosValueAmIGuessing(_username) asked: @_game.Rounds[^2].Question.Question</p>
+            @if (_game.TryGetMyHint(_username, out var hint))
             {
-                <p>You even have a hint: the hint is @(hint ? game.Rounds[^2].Question.Option1 : game.Rounds[^2].Question.Option2)</p>
+                <p>You even have a hint: the hint is @(hint ? _game.Rounds[^2].Question.Option1 : _game.Rounds[^2].Question.Option2)</p>
             }
             <p>
                 @* They wished *@
-                <button disabled="@_myAnswer" onclick="@(() => { _myAnswer = true; })">@game.Rounds[^2].Question.Option1</button>
-                <button disabled="@(!_myAnswer)" onclick="@(() => { _myAnswer = false; })">@game.Rounds[^2].Question.Option2</button>
+                <button disabled="@_myAnswer" onclick="@(() => { _myAnswer = true; })">@_game.Rounds[^2].Question.Option1</button>
+                <button disabled="@(!_myAnswer)" onclick="@(() => { _myAnswer = false; })">@_game.Rounds[^2].Question.Option2</button>
                 <button @onclick="Answer">Submit</button> @* todo here *@
             </p>
         }
         
-        if (!game.HaveIWished(_username) && _answered)
+        if (!_game.HaveIWished(_username) && _answered)
         {
             
-            <p>@game.Rounds.Last().Question.Question (@game.WhoAmIGuessingFor(_username) will answer)</p>
+            <p>@_game.Rounds.Last().Question.Question (@_game.WhoAmIGuessingFor(_username) will answer)</p>
             <p>
                 @* I wish *@
-                <button disabled="@_myWish" onclick="@(() => { _myWish = true; })">@game.Rounds.Last().Question.Option1</button>
-                <button disabled="@(!_myWish)" onclick="@(() => { _myWish = false; })">@game.Rounds.Last().Question.Option2</button>
+                <button disabled="@_myWish" onclick="@(() => { _myWish = true; })">@_game.Rounds.Last().Question.Option1</button>
+                <button disabled="@(!_myWish)" onclick="@(() => { _myWish = false; })">@_game.Rounds.Last().Question.Option2</button>
             </p>
             <p>
-                <button disabled="@(_myWishShowHint && _myWishHint)" onclick="@(() => { _myWishShowHint = true; _myWishHint = true; })">Hint: @game.Rounds.Last().Question.Option1</button>
+                <button disabled="@(_myWishShowHint && _myWishHint)" onclick="@(() => { _myWishShowHint = true; _myWishHint = true; })">Hint: @_game.Rounds.Last().Question.Option1</button>
                 <button disabled="@(!_myWishShowHint)" onclick="@(() => { _myWishShowHint = false; })">No hint</button>
-                <button disabled="@(_myWishShowHint && !_myWishHint)" onclick="@(() => { _myWishShowHint = true; _myWishHint = false; })">Hint: @game.Rounds.Last().Question.Option2</button>
+                <button disabled="@(_myWishShowHint && !_myWishHint)" onclick="@(() => { _myWishShowHint = true; _myWishHint = false; })">Hint: @_game.Rounds.Last().Question.Option2</button>
             </p>
             <p>
                 <button @onclick="Wish">Submit</button>
             </p>
         }
 
+    }
+}
+else if (_game.Status == GameStatus.Finished)
+{
+    @if (_stats is null)
+    {
+        <p>Too little statistics to show</p>
+    }
+    else
+    {
+        <div>
+            <h3>Users by guess rate:</h3>
+            <ol>
+                @foreach (var (username, rate) in _stats.GuessRates)
+                {
+                    <li>@username: @Math.Round(rate, 2)</li>
+                }
+            </ol>
+        </div>
+        <div>
+            <h3>Users by lie rate:</h3>
+            <ol>
+                @foreach (var (username, rate) in _stats.LieRates)
+                {
+                    <li>@username: @Math.Round(rate, 2)</li>
+                }
+            </ol>
+        </div>
+        <div>
+            <h3>Couples by guess rate:</h3>
+            <ol>
+                @foreach (var (who, toWhom, rate) in _stats.GuessCouplesRates)
+                {
+                    <li>@who → @toWhom: @Math.Round(rate, 2)</li>
+                }
+            </ol>
+        </div>
+        <div>
+            <h3>Couples by lie rate:</h3>
+            <ol>
+                @foreach (var (who, toWhom, rate) in _stats.LieCouplesRates)
+                {
+                    <li>@who → @toWhom: @Math.Round(rate, 2)</li>
+                }
+            </ol>
+        </div>
     }
 }
 else
@@ -129,7 +178,8 @@ else
     [Parameter]
     public string? CreatorGuid { get; init; }
 
-    private Game game;
+    private Game _game;
+    private GameStats? _stats;
 
     private string? _username = null;
     private bool _isCreator = false;
@@ -148,7 +198,7 @@ else
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        if (!Game.Games.TryGetValue(GameId, out game!))
+        if (!Game.Games.TryGetValue(GameId, out _game!))
         {
             _exception = new Exception("The game does not exist.");
             return;
@@ -156,9 +206,9 @@ else
 
         _qrCodeUrl = Helpers.GenerateQRCode(Navigation.BaseUri + "Game/" + GameId);
 
-        if (game.Status == GameStatus.WaitingForCreator)
+        if (_game.Status == GameStatus.WaitingForCreator)
         {
-            if (CreatorGuid is null || game.CreatorGuid.ToString() != CreatorGuid)
+            if (CreatorGuid is null || _game.CreatorGuid.ToString() != CreatorGuid)
             {
                 _exception = new Exception("Seems like you are not the creator, you cannot join the game right now.");
                 return;
@@ -166,13 +216,13 @@ else
 
             _isCreator = true;
         }
-        else if (game.Status == GameStatus.WaitingForPlayers)
+        else if (_game.Status == GameStatus.WaitingForPlayers)
         {
             // Empty?
         }
         else
         {
-            _exception = new Exception($"Game is in bad status: {game.Status}");
+            _exception = new Exception($"Game is in bad status: {_game.Status}");
             return;
         }
     }
@@ -181,17 +231,17 @@ else
     {
         if (string.IsNullOrEmpty(_username)) return;
 
-        if (game.Users.ContainsKey(_username))
+        if (_game.Users.ContainsKey(_username))
         {
             _exception = new Exception("Username is already taken.");
             return;
         }
 
-        game.Users[_username] = this;
+        _game.Users[_username] = this;
 
         if (_isCreator)
         {
-            game.Status = GameStatus.WaitingForPlayers;
+            _game.Status = GameStatus.WaitingForPlayers;
         }
         
         UpdateAllPages();
@@ -205,14 +255,14 @@ else
             return;
         }
 
-        game.NewRound();
-        game.Status = GameStatus.Playing;
+        _game.NewRound();
+        _game.Status = GameStatus.Playing;
         UpdateAllPages();
     }
 
     private Task UpdateAllPages()
     {
-        var tasks = game.Users.Values.Select(x => x.InvokeAsync(x.StateHasChanged));
+        var tasks = _game.Users.Values.Select(x => x.InvokeAsync(x.StateHasChanged));
         return Task.WhenAll(tasks);
     }
 
@@ -227,10 +277,24 @@ else
         Game.Games.Remove(GameId);
         UpdateAllPages();
     }
+    private void FinishGame()
+    {
+        if (!_isCreator)
+        {
+            _exception = new Exception("You cannot run game");
+            return;
+        }
+
+        _game.Status = GameStatus.Finished;
+
+        _stats = _game.GetStatistics();
+        
+        UpdateAllPages();
+    }
 
     private void Answer()
     {
-        game.AnswerValue(_username!, _myAnswer);
+        _game.AnswerValue(_username!, _myAnswer);
         _myAnswer = false;
         _answered = true;
         MakeNewRoundIfNeeded();
@@ -238,7 +302,7 @@ else
     private void Wish()
     {
         bool? hint = _myWishShowHint ? _myWishHint : null;
-        game.WishValue(_username!, _myWish, hint);
+        _game.WishValue(_username!, _myWish, hint);
         _myWish = false;
         _myWishHint = false;
         _myWishShowHint = true;
@@ -250,20 +314,20 @@ else
     {
         if (!WeNeedNewRound()) return;
 
-        game.NewRound();
+        _game.NewRound();
         UpdateAllPages();
     }
 
     private bool WeNeedNewRound()
     {
-        if (!game.Rounds.Any()) throw new NoRoundsException();
+        if (!_game.Rounds.Any()) throw new NoRoundsException();
 
-        if (game.Rounds.Count == 1)
+        if (_game.Rounds.Count == 1)
         {
-            return game.Rounds.Last().AllWished;
+            return _game.Rounds.Last().AllWished;
         }
 
-        return game.Rounds.Last().AllWished && game.Rounds[^2].AllAnswered;
+        return _game.Rounds.Last().AllWished && _game.Rounds[^2].AllAnswered;
     }
 
 }

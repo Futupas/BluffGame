@@ -1,3 +1,4 @@
+using System.Text;
 using QRCoder;
 
 namespace BluffGame;
@@ -41,6 +42,18 @@ public static class Helpers
         while(option1.Equals(option2)) option2 = RandomChoose(list);
 
         return (option1, option2);
+    }
+
+    public static string GenerateShortId(int length = 5)
+    {
+        var chars = "abcdefghijkmnpqrstuvwxyz23456789".ToCharArray(); // excluding 'l', '1', 'i', '0', 'o' for clarity
+
+        var sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++)
+        {
+            sb.Append(RandomChoose(chars));
+        }
+        return sb.ToString();
     }
 
 }

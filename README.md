@@ -12,7 +12,7 @@ A simple bluff game for a company (trust/no)
 * Lie count must affect visibility of others' lie counts
 * Read stats
 * Normal questions
-* Shorter GUID for game
-* Login by this
-* RandomChoose, Choose2
-* 
+* ✓ Shorter GUID for game
+* ✓ Login by this
+* ✓ RandomChoose, Choose2
+* Stats - Unit tests

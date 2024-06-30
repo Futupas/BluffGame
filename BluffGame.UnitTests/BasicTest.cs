@@ -6,14 +6,14 @@ public class BasicTest
 {
     private void RemoveGame(Game game)
     {
-        Assert.True(Game.Games.Remove(game.Id.ToString()));
+        Assert.True(Game.Games.Remove(game.Id));
     }
 
     [Fact]
     public void AssertCreateGame()
     {
         var game = new Game(CONFIG);
-        Assert.True(Game.Games.ContainsKey(game.Id.ToString()));
+        Assert.True(Game.Games.ContainsKey(game.Id));
         RemoveGame(game);
     }
 
@@ -21,8 +21,8 @@ public class BasicTest
     public void AssertAddUsers()
     {
         var game = new Game(CONFIG);
-        game.Users.Add("user1", new GamePage { GameId = game.Id.ToString(), CreatorGuid = game.CreatorGuid.ToString() });
-        game.Users.Add("user2", new GamePage { GameId = game.Id.ToString(), CreatorGuid = game.CreatorGuid.ToString() });
+        game.Users.Add("user1", new GamePage { GameId = game.Id, CreatorGuid = game.CreatorGuid.ToString() });
+        game.Users.Add("user2", new GamePage { GameId = game.Id, CreatorGuid = game.CreatorGuid.ToString() });
         Assert.Equal(2, game.Users.Count);
         RemoveGame(game);
     }
@@ -31,8 +31,8 @@ public class BasicTest
     public void AssertNewRound()
     {
         var game = new Game(CONFIG);
-        game.Users.Add("user1", new GamePage { GameId = game.Id.ToString(), CreatorGuid = game.CreatorGuid.ToString() });
-        game.Users.Add("user2", new GamePage { GameId = game.Id.ToString(), CreatorGuid = game.CreatorGuid.ToString() });
+        game.Users.Add("user1", new GamePage { GameId = game.Id, CreatorGuid = game.CreatorGuid.ToString() });
+        game.Users.Add("user2", new GamePage { GameId = game.Id, CreatorGuid = game.CreatorGuid.ToString() });
         var round = game.NewRound();
         Assert.Single(game.Rounds);
         Assert.Equal(2, round.Couples.Count);
@@ -43,8 +43,8 @@ public class BasicTest
     public void AssertWishValue()
     {
         var game = new Game(CONFIG);
-        game.Users.Add("user1", new GamePage { GameId = game.Id.ToString(), CreatorGuid = game.CreatorGuid.ToString() });
-        game.Users.Add("user2", new GamePage { GameId = game.Id.ToString(), CreatorGuid = game.CreatorGuid.ToString() });
+        game.Users.Add("user1", new GamePage { GameId = game.Id, CreatorGuid = game.CreatorGuid.ToString() });
+        game.Users.Add("user2", new GamePage { GameId = game.Id, CreatorGuid = game.CreatorGuid.ToString() });
         game.NewRound();
         game.WishValue("user1", true, null);
         var lastRound = game.Rounds.Last();
@@ -57,8 +57,8 @@ public class BasicTest
     public void AssertAnswerValue()
     {
         var game = new Game(CONFIG);
-        game.Users.Add("user1", new GamePage { GameId = game.Id.ToString(), CreatorGuid = game.CreatorGuid.ToString() });
-        game.Users.Add("user2", new GamePage { GameId = game.Id.ToString(), CreatorGuid = game.CreatorGuid.ToString() });
+        game.Users.Add("user1", new GamePage { GameId = game.Id, CreatorGuid = game.CreatorGuid.ToString() });
+        game.Users.Add("user2", new GamePage { GameId = game.Id, CreatorGuid = game.CreatorGuid.ToString() });
         game.NewRound();
         game.NewRound();  // Need at least two rounds for answering
         game.AnswerValue("user2", false);
