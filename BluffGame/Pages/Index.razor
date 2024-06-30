@@ -1,47 +1,21 @@
 ﻿@page "/"
 
 @inject NavigationManager NavigationManager
+@inject IConfiguration _config
 
 
 <PageTitle>Index</PageTitle>
 
 <a href="/Help">Help</a>
 
-<p>
-    <input type="text" placeholder="option1" @bind="_option1" />
-    <input type="text" placeholder="option2" @bind="_option2" />
-</p>
 
 <button @onclick="CreateNewGame">New Game</button>
 
 @code {
-    
-    private string _option1;
-    private string _option2;
-
-    private readonly IReadOnlyList<(string trueOption, string falseOption)> PRESET_OPTIONS = new List<(string trueOption, string falseOption)>()
-    {
-        ("True", "False"),
-        ("Trump", "Biden"),
-        ("Man", "Woman"),
-        ("Heads", "Tails"),
-        ("Option 1", "Option 2"),
-    };
-
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-        
-        var randomOptionIndex = Random.Shared.Next(PRESET_OPTIONS.Count);
-        _option1 = PRESET_OPTIONS[randomOptionIndex].trueOption;
-        _option2 = PRESET_OPTIONS[randomOptionIndex].falseOption;
-    }
 
     private void CreateNewGame()
     {
-        if (string.IsNullOrEmpty(_option1) || string.IsNullOrEmpty(_option2)) return;
-        
-        var game = new Game() { TrueOption = _option1, FalseOption = _option2 };
+        var game = new Game(_config);
         
         NavigationManager.NavigateTo($"/Game/{game.Id}/{game.CreatorGuid}");
     }

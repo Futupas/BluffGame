@@ -79,14 +79,15 @@ else if (game.Status == GameStatus.Playing)
         
         if (!game.HaveIAnswered(_username))
         {
-            <p>You are guessing a number asked by @game.WhosValueAmIGuessing(_username)</p>
+            <p>@game.WhosValueAmIGuessing(_username) asked: @game.Rounds[^2].Question.Question</p>
             @if (game.TryGetMyHint(_username, out var hint))
             {
-                <p>You even have a hint: the hint is @(hint ? game.TrueOption : game.FalseOption)</p>
+                <p>You even have a hint: the hint is @(hint ? game.Rounds[^2].Question.Option1 : game.Rounds[^2].Question.Option2)</p>
             }
             <p>
-                <button disabled="@_myAnswer" onclick="@(() => { _myAnswer = true; })">They wished @game.TrueOption</button>
-                <button disabled="@(!_myAnswer)" onclick="@(() => { _myAnswer = false; })">They wished @game.FalseOption</button>
+                @* They wished *@
+                <button disabled="@_myAnswer" onclick="@(() => { _myAnswer = true; })">@game.Rounds[^2].Question.Option1</button>
+                <button disabled="@(!_myAnswer)" onclick="@(() => { _myAnswer = false; })">@game.Rounds[^2].Question.Option2</button>
                 <button @onclick="Answer">Submit</button> @* todo here *@
             </p>
         }
@@ -94,15 +95,16 @@ else if (game.Status == GameStatus.Playing)
         if (!game.HaveIWished(_username))
         {
             
-            <p>You are guessing a number for @game.WhoAmIGuessingFor(_username)</p>
+            <p>@game.Rounds.Last().Question.Question (@game.WhoAmIGuessingFor(_username) will answer)</p>
             <p>
-                <button disabled="@_myWish" onclick="@(() => { _myWish = true; })">I wish @game.TrueOption</button>
-                <button disabled="@(!_myWish)" onclick="@(() => { _myWish = false; })">I wish @game.FalseOption</button>
+                @* I wish *@
+                <button disabled="@_myWish" onclick="@(() => { _myWish = true; })">@game.Rounds.Last().Question.Option1</button>
+                <button disabled="@(!_myWish)" onclick="@(() => { _myWish = false; })">@game.Rounds.Last().Question.Option2</button>
             </p>
             <p>
-                <button disabled="@(_myWishShowHint && _myWishHint)" onclick="@(() => { _myWishShowHint = true; _myWishHint = true; })">Hint: @game.TrueOption</button>
+                <button disabled="@(_myWishShowHint && _myWishHint)" onclick="@(() => { _myWishShowHint = true; _myWishHint = true; })">Hint: @game.Rounds.Last().Question.Option1</button>
                 <button disabled="@(!_myWishShowHint)" onclick="@(() => { _myWishShowHint = false; })">No hint</button>
-                <button disabled="@(_myWishShowHint && !_myWishHint)" onclick="@(() => { _myWishShowHint = true; _myWishHint = false; })">Hint: @game.FalseOption</button>
+                <button disabled="@(_myWishShowHint && !_myWishHint)" onclick="@(() => { _myWishShowHint = true; _myWishHint = false; })">Hint: @game.Rounds.Last().Question.Option2</button>
             </p>
             <p>
                 <button @onclick="Guess">Submit</button>

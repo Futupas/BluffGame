@@ -12,14 +12,12 @@ namespace BluffGame;
 
 public class Game
 {
+    private readonly IConfiguration _config;
     public static Dictionary<string, Game> Games { get; } = new();
 
 
     public Guid Id { get; private init; } = Guid.NewGuid();
     public Guid CreatorGuid { get; private init; } = Guid.NewGuid();
-    
-    public string TrueOption { get; init; }
-    public string FalseOption { get; init; }
 
     public GameStatus Status { get; set; } = GameStatus.WaitingForCreator;
 
@@ -27,8 +25,9 @@ public class Game
 
     public List<Round> Rounds { get; } = new();
 
-    public Game()
+    public Game(IConfiguration config)
     {
+        _config = config;
         Games[Id.ToString()] = this;
     }
     
@@ -42,8 +41,7 @@ public class Game
     {
         var total = Rounds
             .SelectMany(x => x.Couples)
-            .Where(x => x.UserAnswers == user && x.Wished is not null && x.Answered is not null); 
-        // var total = GetArchiveCouples().Where(x => x.UserAnswers == user);
+            .Where(x => x.UserAnswers == user && x.Wished is not null && x.Answered is not null);
         var guessed = total.Where(x => x.Guessed);
 
         var totalCount = total.Count();
@@ -53,7 +51,6 @@ public class Game
     }
     public double GetUserLieRate(string user)
     {
-        // var total = GetArchiveCouples().Where(x => x.UserAsks == user && x.Lied is not null);
         var total = Rounds
             .SelectMany(x => x.Couples)
             .Where(x => x.UserAsks == user && x.Wished is not null);
@@ -88,17 +85,6 @@ public class Game
 
     public bool TryFindDidIWinInPreviousRound(string user, out bool win)
     {
-        // if (Rounds.Count < 3)
-        // {
-        //     win = false;
-        //     return false;
-        // }
-        //
-        // win = Rounds[^3]
-        //     .Couples
-        //     .First(x => x.UserAnswers == user).Guessed;
-        // return true;
-        
         var result = Rounds
             .LastOrDefault(x => x.Couples.Exists(y => y.UserAnswers == user && y.Answered is not null))?
             .Couples
@@ -108,13 +94,6 @@ public class Game
         win = result ?? false;
         return result is not null;
     }
-
-    // public bool IsRoundFinished()
-    // {
-    //     if (!Rounds.Any()) return true;
-    //
-    //     return Rounds.Last().Couples.All(x => x.Answered is not null);
-    // }
 
     public Round NewRound()
     {
@@ -130,7 +109,11 @@ public class Game
             });
         }
 
-        var round = new Round() { Couples = couples };
+        var questions = _config.GetSection("questions").Get<List<QuestionModel>>();
+        var questionIndex = Random.Shared.Next(questions.Count);
+        var question = questions[questionIndex];
+
+        var round = new Round() { Couples = couples, Question = question };
         Rounds.Add(round);
 
         return round;

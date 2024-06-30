@@ -4,6 +4,8 @@ public record Round
 {
     public List<Couple> Couples { get; init; } = new();
     
+    public QuestionModel Question { get; init; }
+    
     public bool IsArchived => AllWished && AllAnswered;
 
     public bool AllWished => Couples.All(x => x.Wished is not null);
