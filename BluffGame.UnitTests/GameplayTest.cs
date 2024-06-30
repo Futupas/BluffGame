@@ -24,7 +24,7 @@ public class GameplayTest
     [InlineData(32, 128)]
     public void TestGuessRateAndLieRate(int playersCount, int roundsCount)
     {
-        var game = new Game();
+        var game = new Game(CONFIG);
 
         var guessStats = new Dictionary<string, StatsRow>();
         var lieStats = new Dictionary<string, StatsRow>();

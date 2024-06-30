@@ -12,7 +12,7 @@ public class BasicTest
     [Fact]
     public void AssertCreateGame()
     {
-        var game = new Game();
+        var game = new Game(CONFIG);
         Assert.True(Game.Games.ContainsKey(game.Id.ToString()));
         RemoveGame(game);
     }
@@ -20,7 +20,7 @@ public class BasicTest
     [Fact]
     public void AssertAddUsers()
     {
-        var game = new Game();
+        var game = new Game(CONFIG);
         game.Users.Add("user1", new GamePage { GameId = game.Id.ToString(), CreatorGuid = game.CreatorGuid.ToString() });
         game.Users.Add("user2", new GamePage { GameId = game.Id.ToString(), CreatorGuid = game.CreatorGuid.ToString() });
         Assert.Equal(2, game.Users.Count);
@@ -30,7 +30,7 @@ public class BasicTest
     [Fact]
     public void AssertNewRound()
     {
-        var game = new Game();
+        var game = new Game(CONFIG);
         game.Users.Add("user1", new GamePage { GameId = game.Id.ToString(), CreatorGuid = game.CreatorGuid.ToString() });
         game.Users.Add("user2", new GamePage { GameId = game.Id.ToString(), CreatorGuid = game.CreatorGuid.ToString() });
         var round = game.NewRound();
@@ -42,7 +42,7 @@ public class BasicTest
     [Fact]
     public void AssertWishValue()
     {
-        var game = new Game();
+        var game = new Game(CONFIG);
         game.Users.Add("user1", new GamePage { GameId = game.Id.ToString(), CreatorGuid = game.CreatorGuid.ToString() });
         game.Users.Add("user2", new GamePage { GameId = game.Id.ToString(), CreatorGuid = game.CreatorGuid.ToString() });
         game.NewRound();
@@ -56,7 +56,7 @@ public class BasicTest
     [Fact]
     public void AssertAnswerValue()
     {
-        var game = new Game();
+        var game = new Game(CONFIG);
         game.Users.Add("user1", new GamePage { GameId = game.Id.ToString(), CreatorGuid = game.CreatorGuid.ToString() });
         game.Users.Add("user2", new GamePage { GameId = game.Id.ToString(), CreatorGuid = game.CreatorGuid.ToString() });
         game.NewRound();

@@ -10,3 +10,7 @@ A simple bluff game for a company (trust/no)
 * ✓ QR code
 * ✓ Docker
 * Lie count must affect visibility of others' lie counts
+* Read stats
+* Normal questions
+* Shorter GUID for game
+
