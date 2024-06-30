@@ -17,6 +17,9 @@ public class Game
 
     public Guid Id { get; private init; } = Guid.NewGuid();
     public Guid CreatorGuid { get; private init; } = Guid.NewGuid();
+    
+    public string TrueOption { get; init; }
+    public string FalseOption { get; init; }
 
     public GameStatus Status { get; set; } = GameStatus.WaitingForCreator;
 

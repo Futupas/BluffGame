@@ -12,15 +12,23 @@
 @* *@
 @* <SurveyPrompt Title="How is Blazor working for you?"/> *@
 
+<p>
+    <input type="text" placeholder="option1" @bind="_option1" />
+    <input type="text" placeholder="option2" @bind="_option2" />
+</p>
+
 <button @onclick="CreateNewGame">New Game</button>
-
-
 
 @code {
 
+    private string _option1 = "option1";
+    private string _option2 = "option2";
+    
     private void CreateNewGame()
     {
-        var game = new Game();
+        if (string.IsNullOrEmpty(_option1) || string.IsNullOrEmpty(_option2)) return;
+        
+        var game = new Game() { TrueOption = _option1, FalseOption = _option2 };
         
         NavigationManager.NavigateTo($"/Game/{game.Id}/{game.CreatorGuid}");
     }

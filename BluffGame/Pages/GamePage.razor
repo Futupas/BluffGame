@@ -23,7 +23,7 @@ else if (_username is null || !game.Users.ContainsKey(_username))
     <p><input type="text" @bind="_username" placeholder="Enter username" /></p>
     <p><button @onclick="SubmitUsername">Submit username</button></p>
 }
-else if (_isCreator && (game.Status == GameStatus.WaitingForCreator || game.Status == GameStatus.WaitingForPlayers))
+else if (_isCreator && game.Status is GameStatus.WaitingForCreator or GameStatus.WaitingForPlayers)
 {
     <p>Joined @game.Users.Count (@(string.Join(", ", game.Users.Keys)))</p>
     <p>Waiting for others to join</p>
@@ -77,11 +77,11 @@ else if (game.Status == GameStatus.Playing)
             <p>You are guessing a number asked by @game.WhosValueAmIGuessing(_username)</p>
             @if (game.TryGetMyHint(_username, out var hint))
             {
-                <p>You even have a hint: the hint is @(hint)</p>
+                <p>You even have a hint: the hint is @(hint ? game.TrueOption : game.FalseOption)</p>
             }
             <p>
-                <input type="checkbox" @bind="_myAnswer" id="checkboxMyAnswer" />
-                <label for="checkboxMyAnswer">I think, they wished for a True</label>
+                <button disabled="@_myAnswer" onclick="@(() => { _myAnswer = true; })">They wished @game.TrueOption</button>
+                <button disabled="@(!_myAnswer)" onclick="@(() => { _myAnswer = false; })">They wished @game.FalseOption</button>
                 <button @onclick="Answer">Submit</button> @* todo here *@
             </p>
         }
@@ -91,24 +91,16 @@ else if (game.Status == GameStatus.Playing)
             
             <p>You are guessing a number for @game.WhoAmIGuessingFor(_username)</p>
             <p>
-                <ul>
-                    <li>
-                        <input type="checkbox" @bind="_myWish" id="checkboxMyWish" />
-                        <label for="checkboxMyWish">I wish a True</label>
-                    </li>
-                    <li>
-                        <input type="checkbox" @bind="_myWishShowHint" id="checkboxWannaHint" />
-                        <label for="checkboxWannaHint">I will make a hint</label>
-                    </li>
-                    @if (_myWishShowHint)
-                    {
-                        <li>
-                            <input type="checkbox" @bind="_myWishHint" id="checkboxMyHint" />
-                            <label for="checkboxMyHint">My hint is True</label>
-                        </li>
-                    }
-                    <button @onclick="Guess">Submit</button> @* todo here *@
-                </ul>
+                <button disabled="@_myWish" onclick="@(() => { _myWish = true; })">I wish @game.TrueOption</button>
+                <button disabled="@(!_myWish)" onclick="@(() => { _myWish = false; })">I wish @game.FalseOption</button>
+            </p>
+            <p>
+                <button disabled="@(_myWishShowHint && _myWishHint)" onclick="@(() => { _myWishShowHint = true; _myWishHint = true; })">Hint: @game.TrueOption</button>
+                <button disabled="@(!_myWishShowHint)" onclick="@(() => { _myWishShowHint = false; })">No hint</button>
+                <button disabled="@(_myWishShowHint && !_myWishHint)" onclick="@(() => { _myWishShowHint = true; _myWishHint = false; })">Hint: @game.FalseOption</button>
+            </p>
+            <p>
+                <button @onclick="Guess">Submit</button>
             </p>
         }
 
@@ -139,6 +131,7 @@ else
 
     private string? _username = null;
     private bool _isCreator = false;
+
 
     private Exception? _exception = null;
 
@@ -176,7 +169,7 @@ else
             return;
         }
     }
-
+    
     private void SubmitUsername()
     {
         if (string.IsNullOrEmpty(_username)) return;
