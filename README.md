@@ -15,4 +15,4 @@ A simple bluff game for a company (trust/no)
 * ✓ Shorter GUID for game
 * ✓ Login by this
 * ✓ RandomChoose, Choose2
-* Stats - Unit tests
+* ✓ Stats - Unit tests

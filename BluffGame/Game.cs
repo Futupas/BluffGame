@@ -87,7 +87,7 @@ public class Game
                     var all = lieCouples.Where(x => x.UserAsks == who && x.UserAnswers == toWhom);
                     var lied = all.Where(x => x.Lied == true);
                     
-                    lieCouplesRates.Add((who, toWhom, (double)all.Count() / lied.Count()));
+                    lieCouplesRates.Add((who, toWhom, (double)lied.Count() / all.Count()));
                 }
                 
                 //Guess
@@ -95,7 +95,7 @@ public class Game
                     var all = guessCouples.Where(x => x.UserAnswers == who && x.UserAsks == toWhom);
                     var guessed = all.Where(x => x.Guessed);
                     
-                    guessCouplesRates.Add((who, toWhom, (double)all.Count() / guessed.Count()));
+                    guessCouplesRates.Add((who, toWhom, (double)guessed.Count() / all.Count()));
                 }
 
             }
